@@ -18,6 +18,7 @@
 package zookeeper
 
 import (
+	"dubbo.apache.org/dubbo-go/v3/registry/servicediscovery"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -27,7 +28,7 @@ import (
 
 import (
 	dubboCommon "dubbo.apache.org/dubbo-go/v3/common"
-	ex "dubbo.apache.org/dubbo-go/v3/common/extension"
+	dubboConst "dubbo.apache.org/dubbo-go/v3/common/constant"
 	"dubbo.apache.org/dubbo-go/v3/metadata/definition"
 	dr "dubbo.apache.org/dubbo-go/v3/registry"
 	"dubbo.apache.org/dubbo-go/v3/remoting/zookeeper/curator_discovery"
@@ -154,8 +155,7 @@ func (asl *applicationServiceListener) handleEvent(children []string) {
 		}
 		methods, err := asl.getMethods(bkConfig.Interface)
 		if err != nil {
-			logger.Warnf("Get methods of interface %s failed; due to %s", bkConfig.Interface, err.Error())
-			continue
+			logger.Warnf("Get methods of interface %s failed; use prefix pattern to match url, due to %s", bkConfig.Interface, err.Error())
 		}
 
 		apiPattern := registry.GetAPIPattern(bkConfig)
@@ -169,8 +169,16 @@ func (asl *applicationServiceListener) handleEvent(children []string) {
 				MapTo: "opt.types",
 			},
 		}
-		for i := range methods {
-			api := registry.CreateAPIConfig(apiPattern, location, bkConfig, methods[i], mappingParams)
+		if methods != nil && len(methods) != 0 {
+			for i := range methods {
+				api := registry.CreateAPIConfig(apiPattern, location, bkConfig, methods[i], mappingParams)
+				if err := asl.adapterListener.OnAddAPI(api); err != nil {
+					logger.Errorf("Error={%s} happens when try to add api %s", err.Error(), api.Path)
+				}
+			}
+		} else {
+			// can't fetch methods, use http prefix pattern
+			api := registry.CreateAPIConfig(apiPattern, location, bkConfig, constant.AnyValue, mappingParams)
 			if err := asl.adapterListener.OnAddAPI(api); err != nil {
 				logger.Errorf("Error={%s} happens when try to add api %s", err.Error(), api.Path)
 			}
@@ -197,25 +205,15 @@ func (asl *applicationServiceListener) getUrls(path string) []*dubboCommon.URL {
 	instance := toZookeeperInstance(iss)
 
 	metaData := instance.GetMetadata()
-	metadataStorageType, ok := metaData[constant.MetadataStorageTypeKey]
-	if !ok {
-		metadataStorageType = constant.DefaultMetadataStorageType
-	}
-	// get metadata service proxy factory according to the metadataStorageType
-	proxyFactory := ex.GetMetadataServiceProxyFactory(metadataStorageType)
-	if proxyFactory == nil {
-		return nil
-	}
-	metadataService := proxyFactory.GetProxy(instance)
-	if metadataService == nil {
-		logger.Warnf("Get metadataService of instance %s failed", instance)
-		return nil
-	}
-	// call GetExportedURLs to get the exported urls
-	urls, err := metadataService.GetExportedURLs(constant.AnyValue, constant.AnyValue, constant.AnyValue, constant.AnyValue)
+	metadataInfo, err := servicediscovery.GetMetadataInfo(instance.GetServiceName(), instance, metaData[dubboConst.ExportedServicesRevisionPropertyName])
 	if err != nil {
-		logger.Errorf("Get exported urls of instance %s failed; due to %s", instance, err.Error())
+		logger.Errorf("get instance %s metadata info error %v", insPath, err.Error())
 		return nil
+	}
+	instance.SetServiceMetadata(metadataInfo)
+	urls := make([]*dubboCommon.URL, 0)
+	for _, service := range metadataInfo.Services {
+		urls = append(urls, instance.ToURLs(service)...)
 	}
 	return urls
 }

@@ -71,13 +71,15 @@ func (s *SvcListeners) GetAllListener() map[string]registry.Listener {
 }
 
 type BaseRegistry struct {
+	RegisteredType  registry.RegisteredType
 	svcListeners    *SvcListeners
 	facadeRegistry  FacadeRegistry
 	AdapterListener common.RegistryEventListener
 }
 
-func NewBaseRegistry(facade FacadeRegistry, adapterListener common.RegistryEventListener) *BaseRegistry {
+func NewBaseRegistry(facade FacadeRegistry, adapterListener common.RegistryEventListener, registerType registry.RegisteredType) *BaseRegistry {
 	return &BaseRegistry{
+		RegisteredType: registerType,
 		facadeRegistry: facade,
 		svcListeners: &SvcListeners{
 			listeners: make(map[string]registry.Listener),

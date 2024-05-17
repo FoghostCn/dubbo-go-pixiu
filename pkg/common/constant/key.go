@@ -84,7 +84,4 @@ const (
 	NameKey = "name"
 	// RetriesKey retry times
 	RetriesKey = "retries"
-	// MetadataStorageTypeKey the storage type of metadata
-	MetadataStorageTypeKey     = "dubbo.metadata.storage-type"
-	DefaultMetadataStorageType = "local"
 )

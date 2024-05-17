@@ -74,13 +74,14 @@ type (
 	// so any modification to the config, should apply to both `pkg/client/dubbo/dubbo.go`
 	// and `pkg\adapter\dubboregistry\registry`
 	Registry struct {
-		Protocol  string `default:"zookeeper" yaml:"protocol" json:"protocol"`
-		Timeout   string `yaml:"timeout" json:"timeout"`
-		Address   string `yaml:"address" json:"address"`
-		Username  string `yaml:"username" json:"username"`
-		Password  string `yaml:"password" json:"password"`
-		Group     string `default:"DEFAULT_GROUP"  yaml:"group" json:"group"`
-		Namespace string `yaml:"namespace" json:"namespace"`
+		Protocol     string `default:"zookeeper" yaml:"protocol" json:"protocol"`
+		Timeout      string `yaml:"timeout" json:"timeout"`
+		Address      string `yaml:"address" json:"address"`
+		Username     string `yaml:"username" json:"username"`
+		Password     string `yaml:"password" json:"password"`
+		Group        string `default:"DEFAULT_GROUP"  yaml:"group" json:"group"`
+		Namespace    string `yaml:"namespace" json:"namespace"`
+		RegistryType string `yaml:"registry_type" json:"registry_type"` // "application", "interface"
 	}
 
 	// DiscoveryType

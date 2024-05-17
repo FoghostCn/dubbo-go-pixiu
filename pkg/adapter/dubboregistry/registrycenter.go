@@ -24,11 +24,6 @@ import (
 )
 
 import (
-	"github.com/dubbo-go-pixiu/pixiu-api/pkg/api/config"
-	"github.com/dubbo-go-pixiu/pixiu-api/pkg/router"
-)
-
-import (
 	"github.com/apache/dubbo-go-pixiu/pkg/adapter/dubboregistry/registry"
 	_ "github.com/apache/dubbo-go-pixiu/pkg/adapter/dubboregistry/registry/nacos"
 	_ "github.com/apache/dubbo-go-pixiu/pkg/adapter/dubboregistry/registry/zookeeper"
@@ -37,6 +32,9 @@ import (
 	"github.com/apache/dubbo-go-pixiu/pkg/logger"
 	"github.com/apache/dubbo-go-pixiu/pkg/model"
 	"github.com/apache/dubbo-go-pixiu/pkg/server"
+
+	"github.com/dubbo-go-pixiu/pixiu-api/pkg/api/config"
+	"github.com/dubbo-go-pixiu/pixiu-api/pkg/router"
 )
 
 func init() {
@@ -133,8 +131,16 @@ func (a *Adapter) OnAddAPI(r router.API) error {
 			Port:    port,
 		}},
 	)
-	path := strings.Join([]string{r.ApplicationName, r.Interface, r.Method.Method}, constant.PathSlash)
-	match := model.RouterMatch{Path: path, Methods: []string{string(r.HTTPVerb)}}
+
+	var match model.RouterMatch
+	var path string
+	if r.DubboBackendConfig.Method == constant.AnyValue {
+		path = strings.Join([]string{r.ApplicationName, r.Interface}, constant.PathSlash)
+		match = model.RouterMatch{Prefix: path, Methods: []string{string(r.HTTPVerb)}}
+	} else {
+		path = strings.Join([]string{r.ApplicationName, r.Interface, r.Method.Method}, constant.PathSlash)
+		match = model.RouterMatch{Path: path, Methods: []string{string(r.HTTPVerb)}}
+	}
 	route := model.RouteAction{Cluster: cluster}
 	added := &model.Router{ID: path, Match: match, Route: route}
 	server.GetRouterManager().AddRouter(added)

@@ -45,7 +45,7 @@ type NacosRegistry struct {
 }
 
 func (n *NacosRegistry) DoSubscribe() error {
-	intfListener, ok := n.nacosListeners[registry.RegisteredTypeInterface]
+	intfListener, ok := n.nacosListeners[n.RegisteredType]
 	if !ok {
 		return errors.New("Listener for interface level registration does not initialized")
 	}
@@ -91,9 +91,10 @@ func newNacosRegistry(regConfig model.Registry, adapterListener common.RegistryE
 		client:         client,
 		nacosListeners: make(map[registry.RegisteredType]registry.Listener),
 	}
-	nacosRegistry.nacosListeners[registry.RegisteredTypeInterface] = newNacosIntfListener(client, nacosRegistry, &regConfig, adapterListener)
+	nacosRegistry.BaseRegistry = baseRegistry.NewBaseRegistry(nacosRegistry, adapterListener, registry.RegisterTypeFromName(regConfig.RegistryType))
+	nacosRegistry.nacosListeners[nacosRegistry.RegisteredType] = newNacosIntfListener(client, nacosRegistry, &regConfig, adapterListener)
 
-	baseReg := baseRegistry.NewBaseRegistry(nacosRegistry, adapterListener)
+	baseReg := baseRegistry.NewBaseRegistry(nacosRegistry, adapterListener, registry.RegisterTypeFromName(regConfig.RegistryType))
 	nacosRegistry.BaseRegistry = baseReg
 	return baseReg, nil
 }
