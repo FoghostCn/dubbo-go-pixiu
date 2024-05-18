@@ -18,23 +18,23 @@
 package zookeeper
 
 import (
-	hessian "github.com/apache/dubbo-go-hessian2"
 	"strings"
 	"time"
 )
 
 import (
-	"github.com/pkg/errors"
-)
-
-import (
 	dubboCommon "dubbo.apache.org/dubbo-go/v3/common"
+
+	hessian "github.com/apache/dubbo-go-hessian2"
+
 	"github.com/apache/dubbo-go-pixiu/pkg/adapter/dubboregistry/common"
 	"github.com/apache/dubbo-go-pixiu/pkg/adapter/dubboregistry/registry"
 	baseRegistry "github.com/apache/dubbo-go-pixiu/pkg/adapter/dubboregistry/registry/base"
 	zk "github.com/apache/dubbo-go-pixiu/pkg/adapter/dubboregistry/remoting/zookeeper"
 	"github.com/apache/dubbo-go-pixiu/pkg/common/constant"
 	"github.com/apache/dubbo-go-pixiu/pkg/model"
+
+	"github.com/pkg/errors"
 )
 
 var (
