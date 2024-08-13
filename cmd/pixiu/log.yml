@@ -1,0 +1,10 @@
+level: debug
+encoding: console
+outputPaths:
+    - stdout
+errorOutputPaths:
+    - stderr
+encoderConfig:
+    messageKey: message
+    levelKey: level
+    levelEncoder: lowercase
