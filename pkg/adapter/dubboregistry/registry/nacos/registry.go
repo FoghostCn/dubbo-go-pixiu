@@ -92,9 +92,13 @@ func newNacosRegistry(regConfig model.Registry, adapterListener common.RegistryE
 		nacosListeners: make(map[registry.RegisteredType]registry.Listener),
 	}
 	nacosRegistry.BaseRegistry = baseRegistry.NewBaseRegistry(nacosRegistry, adapterListener, registry.RegisterTypeFromName(regConfig.RegistryType))
-	nacosRegistry.nacosListeners[nacosRegistry.RegisteredType] = newNacosIntfListener(client, nacosRegistry, &regConfig, adapterListener)
-
-	baseReg := baseRegistry.NewBaseRegistry(nacosRegistry, adapterListener, registry.RegisterTypeFromName(regConfig.RegistryType))
-	nacosRegistry.BaseRegistry = baseReg
-	return baseReg, nil
+	switch nacosRegistry.RegisteredType {
+	case registry.RegisteredTypeInterface:
+		nacosRegistry.nacosListeners[nacosRegistry.RegisteredType] = newNacosIntfListener(client, nacosRegistry, &regConfig, adapterListener)
+	//case registry.RegisteredTypeApplication:
+	//nacosRegistry.nacosListeners[nacosRegistry.RegisteredType] = newZkAppListener(zkReg.client, zkReg, zkReg.AdapterListener)
+	default:
+		return nil, errors.Errorf("Unsupported registry type: %s", regConfig.RegistryType)
+	}
+	return nacosRegistry, nil
 }

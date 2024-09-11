@@ -84,6 +84,8 @@ func newZKRegistry(regConfig model.Registry, adapterListener common.RegistryEven
 		zkReg.zkListeners[zkReg.RegisteredType] = newZKIntfListener(zkReg.client, zkReg, zkReg.AdapterListener)
 	case registry.RegisteredTypeApplication:
 		zkReg.zkListeners[zkReg.RegisteredType] = newZkAppListener(zkReg.client, zkReg, zkReg.AdapterListener)
+	default:
+		return nil, errors.Errorf("Unsupported registry type: %s", regConfig.RegistryType)
 	}
 	return zkReg, nil
 }
