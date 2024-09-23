@@ -81,7 +81,7 @@ type (
 		Password     string `yaml:"password" json:"password"`
 		Group        string `default:"DEFAULT_GROUP"  yaml:"group" json:"group"`
 		Namespace    string `yaml:"namespace" json:"namespace"`
-		RegistryType string `yaml:"registry_type" json:"registry_type"` // "application", "interface"
+		RegistryType string `default:"interface" yaml:"registry_type" json:"registry_type"` // "application", "interface"
 	}
 
 	// DiscoveryType
